@@ -13,9 +13,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-function generateRandomString() {
-  
+const generateRandomString = function() {
+    return Math.random().toString(20).substr(2, 6) 
 }
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
