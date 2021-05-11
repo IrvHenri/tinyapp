@@ -1,5 +1,7 @@
 const express = require("express");
+const cookieParser = require('cookie-parser')
 const app = express();
+app.use(cookieParser());
 const PORT = 8080;
 
 //  Middleware
@@ -22,17 +24,23 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+
 app.get("/urls", (req, res) => {
+  const {username} = req.cookies
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const {username} = req.cookies
+  const templateVars = { username: username}
+  res.render("urls_new",templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const {username} = req.cookies
   const templateVars = {
+    username: username,
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
@@ -83,6 +91,18 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
   
 });
+/////////////////
+// LOGIN ROUTE
+/////////////////
+app.post('/login', (req,res)=>{
+  console.log(req.body)
+  const {username} = req.body
+
+  res.cookie('username',username)
+  res.redirect('/urls')
+
+})
+
 
 /////////////////
 // DELETE URL
