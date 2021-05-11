@@ -11,16 +11,18 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <form method="POST" action="/urls/<%= shortURL %>" > <div class="form-group d-flex flex-column align-items-center p-4"><div style="width: 20em;"><input
-          style="width: 100%"
-          class="form-control-lg text-center mb-3"
-          type="text"
-          name="longURL"
-          id="longURL"
-          value="<%= longURL %> "></div> <input type="submit" class="btn btn-primary" value="Update" /></div></form>   </h5>
+        <h5 class="card-title">TinyURL for: <%= longURL %>   </h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
-    <div class="card-footer text-muted"></div>
+    <div class="card-footer text-muted d-flex flex-column align-items-center  "> <h3>Edit</h3><form method="POST" action="/urls/<%= shortURL %>" class=" d-flex  w-50 align-items-center justify-content-center" >  
+      <label for="longUrl" class=" h6 m-0  mr-1 w-50 p-0" > New URL:</label>
+      <input
+      class="form-control text-center w-100 mr-1"
+      type="text"
+      name="longURL"
+      id="longURL"
+      value="<%= longURL %> ">   <input type="submit" class="btn btn-primary" value="Submit" /></form> </div>
+    
   </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
