@@ -17,4 +17,13 @@ const findUserID = function (email, db) {
   }
 }
 
-module.exports = {generateRandomString, createNewUser , findUserID}
+const isExistingUser = (email,db)=>{
+  for (let key in db) {
+    if (db[key].email === email) {
+      return true
+    }
+  }
+  return false
+}
+
+module.exports = {isExistingUser,generateRandomString, createNewUser , findUserID}

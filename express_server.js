@@ -3,7 +3,8 @@ const cookieParser = require("cookie-parser");
 const {
   generateRandomString,
   createNewUser,
-  findUserID
+  findUserID,
+  isExistingUser
 } = require("./helpers/helperFunctions");
 const app = express();
 app.use(cookieParser());
@@ -41,6 +42,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const { user_id } = req.cookies;
   let user = users[user_id];
+  console.log(user)
   const templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
@@ -107,6 +109,12 @@ app.post("/urls", (req, res) => {
 // Login / Logout Routes
 /////////////////
 
+app.get('/login', (req,res)=>{
+  const { user_id } = req.cookies;
+  let user = users[user_id];
+    const templateVars = { user };
+  res.render('login', templateVars)
+})
 
 app.post("/login", (req, res) => {
   const { email } = req.body;
@@ -125,11 +133,23 @@ app.post("/logout", (req, res) => {
 /////////////////
 
 app.get("/register", (req, res) => {
-  const templateVars = { user: null };
+  const { user_id } = req.cookies;
+let user = users[user_id];
+  const templateVars = { user };
   res.render("registration", templateVars);
 });
 
 app.post("/register", (req, res) => {
+ 
+  const {email , password} = req.body
+  if (!email && !password){
+   return res.sendStatus(400)
+  }
+
+  if(isExistingUser(email,users)){
+   return res.sendStatus(400)
+  }
+
   let user = createNewUser(req.body);
   // add new user object to global users object
   users[user.id] = user;
