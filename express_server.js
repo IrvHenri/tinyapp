@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const {generateRandomString, createNewUser} = require('./helpers/helperFunctions')
 const app = express();
 app.use(cookieParser());
 const PORT = 8080;
@@ -29,10 +30,6 @@ const users = {
   },
 };
 
-const generateRandomString = function () {
-  return Math.random().toString(20).substr(2, 6);
-};
-console.log(generateRandomString());
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -97,6 +94,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
+
 /////////////////
 // Login / Logout Routes
 /////////////////
@@ -114,17 +112,13 @@ app.post("/logout", (req, res) => {
 /////////////////
 // Register Routes
 /////////////////
+
 app.get("/register", (req, res) => {
   const templateVars = { username: null };
   res.render("registration", templateVars);
 });
 
-const createNewUser = (userParams) => {
-  let id = generateRandomString();
-  const { email, password } = userParams;
-  // include ID, email and password
-  return { id, email, password };
-};
+
 app.post("/register", (req, res) => {
   let user = createNewUser(req.body);
 
