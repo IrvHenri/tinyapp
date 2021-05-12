@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const {
   generateRandomString,
   createNewUser,
+  findUserID
 } = require("./helpers/helperFunctions");
 const app = express();
 app.use(cookieParser());
@@ -38,11 +39,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  // const { user_id } = req.cookies;
   const { user_id } = req.cookies;
-
   let user = users[user_id];
-
   const templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
@@ -109,13 +107,7 @@ app.post("/urls", (req, res) => {
 // Login / Logout Routes
 /////////////////
 
-const findUserID = function (email, db) {
-  for (let key in db) {
-    if (key.email === email) {
-      return key.id;
-    }
-  }
-};
+
 app.post("/login", (req, res) => {
   const { email } = req.body;
   let id = findUserID(email, users);
@@ -139,10 +131,8 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   let user = createNewUser(req.body);
-
   // add new user object to global users object
   users[user.id] = user;
-  console.log("Users:", users);
   // set user_id cookie to users generated ID
   res.cookie("user_id", user.id);
   // redirect to the /urls page
@@ -163,10 +153,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // 404
 /////////////////
 
+//fix
 app.use(function (req, res) {
-  const { username } = req.cookies;
+  const { user_id } = req.cookies;
+
+  let user = users[user_id];
   res.status(404);
-  res.render("404_error_template", { title: "404: Page Not Found!", username });
+  res.render("404_error_template", { title: "404: Page Not Found!", user });
 });
 
 app.listen(PORT, () => {

@@ -9,6 +9,12 @@ const createNewUser = (userParams) => {
   return { id, email, password };
 };
 
+const findUserID = function (email, db) {
+  for (let key in db) {
+    if (db[key].email === email) {
+      return db[key].id;
+    }
+  }
+}
 
-
-module.exports = {generateRandomString, createNewUser}
+module.exports = {generateRandomString, createNewUser , findUserID}
