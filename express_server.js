@@ -1,10 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const {
-  generateRandomString,
-  createNewUser,
-isExistingUser,
-  authenticateUser,
+  helperGenerator
 } = require("./helpers/helperFunctions");
 const app = express();
 app.use(cookieParser());
@@ -22,6 +19,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+
 const users = {
   "6fd85i": {
     id: "6fd85i",
@@ -34,6 +32,7 @@ const users = {
     password: "dishwasher-funk",
   },
 };
+const {generateRandomString, createNewUser ,authenticateUser} = helperGenerator(users)
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -119,7 +118,7 @@ app.post("/login", (req, res) => {
   const result = authenticateUser(req.body, users);
 
   if (result.error) {
-    return res.send(403);
+    return res.sendStatus(403);
   }
   res.cookie("user_id", result.data.id);
   res.redirect("/urls");
@@ -142,21 +141,11 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const { email, password } = req.body;
-  if (!email && !password) {
-    return res.sendStatus(400);
+  const result = createNewUser(req.body)
+  if(result.error){
+    return res.sendStatus(400)
   }
-
-  if (isExistingUser(email, users)) {
-    return res.sendStatus(400);
-  }
-
-  let user = createNewUser(req.body);
-  // add new user object to global users object
-  users[user.id] = user;
-  // set user_id cookie to users generated ID
-  res.cookie("user_id", user.id);
-  // redirect to the /urls page
+  res.cookie('user_id',result.data.id)
   res.redirect("/urls");
 });
 
