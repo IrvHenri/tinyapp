@@ -12,8 +12,9 @@
     </div>
 
       <% if( user && user.id){ %>
+        <div class="d-flex align-items-center "><p  class="p-0 m-0 mr-2">Logged in: <%= user.email %> </p>
+          <form method="POST" action="/logout"><button type="submit" class="badge badge-primary p-2 border-0">Logout</button></form></div>
         
-        <form method="POST" action="/logout"><button type="submit" class="btn btn-primary">Logout</button></form>
        <% } else { %>
         <div>
           <a href="/register" class="badge badge-primary p-2 "> Register</a>

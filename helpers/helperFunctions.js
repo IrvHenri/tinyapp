@@ -9,14 +9,6 @@ const createNewUser = (userParams) => {
   return { id, email, password };
 };
 
-const findUserID = function (email, db) {
-  for (let key in db) {
-    if (db[key].email === email) {
-      return db[key].id;
-    }
-  }
-}
-
 const isExistingUser = (email,db)=>{
   for (let key in db) {
     if (db[key].email === email) {
@@ -26,4 +18,19 @@ const isExistingUser = (email,db)=>{
   return false
 }
 
-module.exports = {isExistingUser,generateRandomString, createNewUser , findUserID}
+const authenticateUser = (userParams,db) => {
+  const { email, password } = userParams
+  for (const user in db) {
+       
+    if (db[user].email === email) {
+      if (db[user].password === password) {
+        return { data: db[user], error: null }
+      }
+      return { data: null, error: "Incorrect password" }
+
+    }
+  }
+  return { data: null, error: "Incorrect email" }
+}
+
+module.exports = {isExistingUser,generateRandomString, createNewUser ,authenticateUser}

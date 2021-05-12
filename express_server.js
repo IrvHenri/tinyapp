@@ -3,8 +3,8 @@ const cookieParser = require("cookie-parser");
 const {
   generateRandomString,
   createNewUser,
-  findUserID,
-  isExistingUser
+isExistingUser,
+  authenticateUser,
 } = require("./helpers/helperFunctions");
 const app = express();
 app.use(cookieParser());
@@ -42,7 +42,6 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const { user_id } = req.cookies;
   let user = users[user_id];
-  console.log(user)
   const templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
@@ -109,17 +108,20 @@ app.post("/urls", (req, res) => {
 // LOGIN / LOGOUT Routes
 /////////////////
 
-app.get('/login', (req,res)=>{
+app.get("/login", (req, res) => {
   const { user_id } = req.cookies;
   let user = users[user_id];
-    const templateVars = { user };
-  res.render('login', templateVars)
-})
+  const templateVars = { user };
+  res.render("login", templateVars);
+});
 
 app.post("/login", (req, res) => {
-  const { email } = req.body;
-  let id = findUserID(email, users);
-  res.cookie("user_id", id);
+  const result = authenticateUser(req.body, users);
+
+  if (result.error) {
+    return res.send(403);
+  }
+  res.cookie("user_id", result.data.id);
   res.redirect("/urls");
 });
 
@@ -134,20 +136,19 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   const { user_id } = req.cookies;
-let user = users[user_id];
+  let user = users[user_id];
   const templateVars = { user };
   res.render("registration", templateVars);
 });
 
 app.post("/register", (req, res) => {
- 
-  const {email , password} = req.body
-  if (!email && !password){
-   return res.sendStatus(400)
+  const { email, password } = req.body;
+  if (!email && !password) {
+    return res.sendStatus(400);
   }
 
-  if(isExistingUser(email,users)){
-   return res.sendStatus(400)
+  if (isExistingUser(email, users)) {
+    return res.sendStatus(400);
   }
 
   let user = createNewUser(req.body);
