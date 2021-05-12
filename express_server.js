@@ -1,6 +1,9 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const {generateRandomString, createNewUser} = require('./helpers/helperFunctions')
+const {
+  generateRandomString,
+  createNewUser,
+} = require("./helpers/helperFunctions");
 const app = express();
 app.use(cookieParser());
 const PORT = 8080;
@@ -30,27 +33,34 @@ const users = {
   },
 };
 
-
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
-  const { username } = req.cookies;
-  const templateVars = { urls: urlDatabase, username };
+  // const { user_id } = req.cookies;
+  const { user_id } = req.cookies;
+
+  let user = users[user_id];
+
+  const templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const { username } = req.cookies;
-  const templateVars = { username };
+  const { user_id } = req.cookies;
+
+  let user = users[user_id];
+  const templateVars = { user };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const { username } = req.cookies;
+  const { user_id } = req.cookies;
+
+  let user = users[user_id];
   const templateVars = {
-    username,
+    user,
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
@@ -98,14 +108,23 @@ app.post("/urls", (req, res) => {
 /////////////////
 // Login / Logout Routes
 /////////////////
+
+const findUserID = function (email, db) {
+  for (let key in db) {
+    if (key.email === email) {
+      return key.id;
+    }
+  }
+};
 app.post("/login", (req, res) => {
-  const { username } = req.body;
-  res.cookie("username", username);
+  const { email } = req.body;
+  let id = findUserID(email, users);
+  res.cookie("user_id", id);
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -114,16 +133,16 @@ app.post("/logout", (req, res) => {
 /////////////////
 
 app.get("/register", (req, res) => {
-  const templateVars = { username: null };
+  const templateVars = { user: null };
   res.render("registration", templateVars);
 });
-
 
 app.post("/register", (req, res) => {
   let user = createNewUser(req.body);
 
   // add new user object to global users object
   users[user.id] = user;
+  console.log("Users:", users);
   // set user_id cookie to users generated ID
   res.cookie("user_id", user.id);
   // redirect to the /urls page
