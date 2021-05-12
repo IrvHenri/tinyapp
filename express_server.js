@@ -7,7 +7,7 @@ const PORT = 8080;
 //  Middleware
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use( express.static( "public" ) );
+app.use(express.static("public"));
 // Set Ejs view engine
 app.set("view engine", "ejs");
 
@@ -16,23 +16,23 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const users = { 
+const users = {
   "6fd85i": {
-    id: "6fd85i", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    id: "6fd85i",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
   },
- "gji08b": {
-    id: "gji08b", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
-}
+  gji08b: {
+    id: "gji08b",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 const generateRandomString = function () {
   return Math.random().toString(20).substr(2, 6);
 };
-console.log(generateRandomString())
+console.log(generateRandomString());
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -98,7 +98,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 /////////////////
-// LOGIN ROUTE
+// Login / Logout Routes
 /////////////////
 app.post("/login", (req, res) => {
   const { username } = req.body;
@@ -106,19 +106,35 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-/////////////////
-// LOGOUT ROUTE
-/////////////////
-
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
 });
 
-app.get('/register', (req,res)=>{
-  const templateVars = {username : null}
-  res.render('registration',templateVars)
-})
+/////////////////
+// Register Routes
+/////////////////
+app.get("/register", (req, res) => {
+  const templateVars = { username: null };
+  res.render("registration", templateVars);
+});
+
+const createNewUser = (userParams) => {
+  let id = generateRandomString();
+  const { email, password } = userParams;
+  // include ID, email and password
+  return { id, email, password };
+};
+app.post("/register", (req, res) => {
+  let user = createNewUser(req.body);
+
+  // add new user object to global users object
+  users[user.id] = user;
+  // set user_id cookie to users generated ID
+  res.cookie("user_id", user.id);
+  // redirect to the /urls page
+  res.redirect("/urls");
+});
 
 /////////////////
 // DELETE URL
@@ -131,15 +147,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 /////////////////
-// 404 
+// 404
 /////////////////
 
 app.use(function (req, res) {
-  const {username} = req.cookies
-  res.status(404)
-  res.render('404_error_template', {title: '404: Page Not Found!', username});
+  const { username } = req.cookies;
+  res.status(404);
+  res.render("404_error_template", { title: "404: Page Not Found!", username });
 });
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
