@@ -16,9 +16,23 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+const users = { 
+  "6fd85i": {
+    id: "6fd85i", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "gji08b": {
+    id: "gji08b", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 const generateRandomString = function () {
   return Math.random().toString(20).substr(2, 6);
 };
+console.log(generateRandomString())
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -45,9 +59,6 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
-/////////////////
-// UPDATE URL
-/////////////////
 
 app.post("/urls/:shortURL", (req, res) => {
   //extract shortUrl from req.params
@@ -103,6 +114,11 @@ app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
 });
+
+app.get('/register', (req,res)=>{
+  const templateVars = {username : null}
+  res.render('registration',templateVars)
+})
 
 /////////////////
 // DELETE URL
