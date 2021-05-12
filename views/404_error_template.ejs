@@ -8,22 +8,13 @@
 
 <body>
   <%- include('partials/_header') %>
-  <div class="card text-center">
-      <div class="card-header"></div>
-      <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %>   </h5>
-        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
-      </div>
-    <div class="card-footer text-muted d-flex flex-column align-items-center  "> <h3>Edit</h3><form method="POST" action="/urls/<%= shortURL %>" class=" d-flex  w-50 align-items-center justify-content-around   mt-3" >  
-      <label for="longUrl" class=" m-0  mr-1 w-25 p-0  " > New URL:</label>
-      <input
-      class="form-control  mr-1"
-      type="text"
-      name="longURL"
-      id="longURL"
-      value="<%= longURL %> ">   <input type="submit" class="btn btn-primary" value="Submit" /></form> </div>
+  <div class="container mr-auto ml-auto mt-5 w-50">
+    <h4 class="text-center mt-4  "><%= title %></h4>
+    <img src="/img/shiba-inu.png" alt="shiba-inu" class="figure-img img-fluid rounded p-5">
     
   </div>
+  
+    
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>

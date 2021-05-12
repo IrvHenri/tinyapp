@@ -7,6 +7,7 @@ const PORT = 8080;
 //  Middleware
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use( express.static( "public" ) );
 // Set Ejs view engine
 app.set("view engine", "ejs");
 
@@ -95,7 +96,7 @@ app.post("/login", (req, res) => {
 });
 
 /////////////////
-// LOGIN ROUTE
+// LOGOUT ROUTE
 /////////////////
 
 app.post("/logout", (req, res) => {
@@ -106,11 +107,23 @@ app.post("/logout", (req, res) => {
 /////////////////
 // DELETE URL
 /////////////////
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   const { shortURL } = req.params;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
+
+/////////////////
+// 404 
+/////////////////
+
+app.use(function (req, res) {
+  const {username} = req.cookies
+  res.status(404)
+  res.render('404_error_template', {title: '404: Page Not Found!', username});
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
