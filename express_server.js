@@ -32,7 +32,7 @@ const users = {
     password: "dishwasher-funk",
   },
 };
-const {generateRandomString, createNewUser ,authenticateUser} = helperGenerator(users)
+const {generateRandomString, createNewUser ,authenticateUser} = helperGenerator(users);
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -47,10 +47,12 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const { user_id } = req.cookies;
-
-  let user = users[user_id];
+let user = users[user_id];
   const templateVars = { user };
-  res.render("urls_new", templateVars);
+  if(user && user_id){
+    res.render("urls_new", templateVars);
+  }
+  res.redirect('/login')
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -80,8 +82,6 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  // if (req.params.shortURL) -> res.redirect(longURL)
-  // else redirect -> 404
   const longURL = urlDatabase[req.params.shortURL];
 
   res.redirect(longURL);
@@ -141,11 +141,11 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const result = createNewUser(req.body)
-  if(result.error){
-    return res.sendStatus(400)
+  const result = createNewUser(req.body);
+  if (result.error) {
+    return res.sendStatus(400);
   }
-  res.cookie('user_id',result.data.id)
+  res.cookie('user_id',result.data.id);
   res.redirect("/urls");
 });
 
@@ -164,7 +164,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 /////////////////
 
 //fix
-app.use(function (req, res) {
+app.use(function(req, res) {
   const { user_id } = req.cookies;
 
   let user = users[user_id];
