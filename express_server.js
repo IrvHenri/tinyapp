@@ -106,7 +106,7 @@ app.post("/urls", (req, res) => {
 });
 
 /////////////////
-// Login / Logout Routes
+// LOGIN / LOGOUT Routes
 /////////////////
 
 app.get('/login', (req,res)=>{
