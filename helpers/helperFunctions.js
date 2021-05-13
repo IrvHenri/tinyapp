@@ -5,7 +5,7 @@ const helperGenerator = db =>{
     return Math.random().toString(20).substr(2, 6);
   };
   
-  const findUserByEmail = (email)=>{
+  const validateUserByEmail = (email)=>{
     for (let key in db) {
       if (db[key].email === email) {
         return true
@@ -15,7 +15,7 @@ const helperGenerator = db =>{
   }
 
   const createNewUser = (userParams) => {
-    if(findUserByEmail(userParams.email)){
+    if(validateUserByEmail(userParams.email)){
       return {data: null , error: 'User already exists'}
     }
     
@@ -35,9 +35,9 @@ const helperGenerator = db =>{
     for (const user in db) {
          
       if (db[user].email  === email) {
-        console.log(db[user].password)
-        console.log(password)
+        
         if ( bcrypt.compareSync(password, db[user].password )) {
+          
           return { data: db[user], error: null }
         }
         return { data: null, error: "Incorrect password" }
@@ -47,7 +47,7 @@ const helperGenerator = db =>{
     return { data: null, error: "Incorrect email" }
   }
 
-  return {findUserByEmail,generateRandomString, createNewUser ,authenticateUser}
+  return {validateUserByEmail,generateRandomString, createNewUser ,authenticateUser}
 }
 
 const urlsForUser = (id,db)=>{
