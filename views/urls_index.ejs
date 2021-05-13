@@ -11,7 +11,9 @@
 <body>
   <%- include('partials/_header') %>
   <main style="margin: 1em;">
-    <h3>My URLs</h3>
+
+      <% if (user) { %>
+        <h3>My URLs</h3>
     <table class="table">
       <thead>
         <tr>
@@ -35,6 +37,15 @@
         <% } %>
       </tbody>
     </table>
+      <% } else { %>
+        <div class="jumbotron jumbotron-fluid mt-5 ">
+          <div class="container">
+            <h1 class="display-4">Welcome To TinyApp!</h1>
+            <p class="lead"> Join now! Already a member? Login above!</p>
+          </div>
+        </div>
+      <% } %>
+   
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

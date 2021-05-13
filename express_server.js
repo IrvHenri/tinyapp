@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { helperGenerator } = require("./helpers/helperFunctions");
+const { helperGenerator,urlsForUser } = require("./helpers/helperFunctions");
 const app = express();
 app.use(cookieParser());
 const PORT = 8080;
@@ -43,10 +43,13 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+
+
 app.get("/urls", (req, res) => {
   const { user_id } = req.cookies;
   let user = users[user_id];
-  const templateVars = { urls: urlDatabase, user };
+  let userURLS = urlsForUser(user_id, urlDatabase)
+  const templateVars = { urls: userURLS, user };
   res.render("urls_index", templateVars);
 });
 

@@ -44,9 +44,23 @@ const helperGenerator = db =>{
     }
     return { data: null, error: "Incorrect email" }
   }
+
+  
   return {isExistingUser,generateRandomString, createNewUser ,authenticateUser}
+}
+
+const urlsForUser = (id,db)=>{
+  let urls = {}
+  for(let key in db){
+    
+    if(db[key].userID === id){
+      
+      urls[key] = db[key]
+    }
+  }
+  return urls
 }
 
 
 
-module.exports = {helperGenerator}
+module.exports = {helperGenerator, urlsForUser}
