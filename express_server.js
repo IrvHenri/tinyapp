@@ -48,9 +48,11 @@ app.get("/", (req, res) => {
 /////////////////
 //   Home page routes
 /////////////////
+
 app.get("/urls", (req, res) => {
   const { user_id } = req.session;
   let user = users[user_id];
+  // if logged user_id is truthy, template will render the user's urls else it will display welcome message.
   let userURLS = urlsForUser(user_id, urlDatabase);
   const templateVars = { urls: userURLS, user };
   res.render("urls_index", templateVars);
@@ -66,7 +68,7 @@ app.post("/urls", (req, res) => {
 });
 
 /////////////////
-//   Create Url form page  - once User is logged in
+//   Create Url form page
 /////////////////
 
 app.get("/urls/new", (req, res) => {
@@ -81,7 +83,7 @@ app.get("/urls/new", (req, res) => {
 
 
 /////////////////
-//   shortURL routes for viewing & updating LongURL
+//   shortURL routes for viewing & updating urls
 /////////////////
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -89,17 +91,17 @@ app.get("/urls/:shortURL", (req, res) => {
   let user = users[user_id];
   //Error handle for non-existing short url
   if (!urlDatabase[req.params.shortURL]) {
-    return res.render('400_error_template',{ title: "404: Page Not Found!", user })
+    return res.render('400_error_template',{ title: "404: Page Not Found!", user });
   }
   //Error handle non-user url access
   if (!user_id) {
-    return res.render('400_error_template',{ title: "403: Forbidden!", user })
+    return res.render('400_error_template',{ title: "403: Forbidden!", user });
   }
   //Error handle non-owner url access
   const { shortURL } = req.params;
   let ownerOfURL = urlDatabase[shortURL].userID;
   if (user_id !== ownerOfURL) {
-    return res.render('400_error_template',{ title: "403: Forbidden!", user })
+    return res.render('400_error_template',{ title: "403: Forbidden!", user });
   }
 
   const templateVars = {
@@ -128,11 +130,6 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-/// * if your ready to submit then you can delete this route
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 /////////////////
 //    LOGIN & LOGOUT Routes
 /////////////////
@@ -150,7 +147,7 @@ app.post("/login", (req, res) => {
   let user = users[user_id];
 
   if (result.error) {
-    return res.render('400_error_template',{ title: "Username or password is invalid.", user }) 
+    return res.render('400_error_template',{ title: "Username or password is invalid.", user });
   }
   req.session.user_id = result.data.id;
   res.redirect("/urls");
@@ -178,7 +175,7 @@ app.post("/register", (req, res) => {
   let user = users[user_id];
   if (result.error) {
     //return html response
-    return res.render('400_error_template',{ title: "Email already taken!", user })
+    return res.render('400_error_template',{ title: "Email already taken!", user });
   }
   req.session.user_id = result.data.id;
 
@@ -186,7 +183,7 @@ app.post("/register", (req, res) => {
 });
 
 /////////////////
-//  DELETE URL     
+//  DELETE URL
 /////////////////
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -208,7 +205,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // 404 routes
 /////////////////
 
-app.use(function (req, res) {
+app.use(function(req, res) {
   const { user_id } = req.session;
 
   let user = users[user_id];
