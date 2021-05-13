@@ -163,16 +163,19 @@ app.post("/register", (req, res) => {
 /////////////////
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const { user_id } = req.cookies;
   const { shortURL } = req.params;
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+  if(user_id){
+    delete urlDatabase[shortURL];
+   return res.redirect("/urls");
+  } 
+  return res.sendStatus(401)
 });
 
 /////////////////
 // 404
 /////////////////
 
-//fix
 app.use(function (req, res) {
   const { user_id } = req.cookies;
 
