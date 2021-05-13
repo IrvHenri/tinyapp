@@ -4,7 +4,7 @@ const helperGenerator = db =>{
   };
   
 
-  const isExistingUser = (email)=>{
+  const findUserByEmail = (email)=>{
     for (let key in db) {
       if (db[key].email === email) {
         return true
@@ -14,7 +14,7 @@ const helperGenerator = db =>{
   }
 
   const createNewUser = (userParams) => {
-    if(isExistingUser(userParams.email)){
+    if(findUserByEmail(userParams.email)){
       return {data: null , error: 'User already exists'}
     }
     let id = generateRandomString();
@@ -46,7 +46,7 @@ const helperGenerator = db =>{
   }
 
   
-  return {isExistingUser,generateRandomString, createNewUser ,authenticateUser}
+  return {findUserByEmail,generateRandomString, createNewUser ,authenticateUser}
 }
 
 const urlsForUser = (id,db)=>{

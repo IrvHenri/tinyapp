@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { helperGenerator,urlsForUser } = require("./helpers/helperFunctions");
+const { helperGenerator, urlsForUser } = require("./helpers/helperFunctions");
 const app = express();
 app.use(cookieParser());
 const PORT = 8080;
@@ -32,23 +32,21 @@ const users = {
 
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
 };
-
 
 const { generateRandomString, createNewUser, authenticateUser } =
   helperGenerator(users);
 
+  ///  you can redirect to /urls *
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-
-
 app.get("/urls", (req, res) => {
   const { user_id } = req.cookies;
   let user = users[user_id];
-  let userURLS = urlsForUser(user_id, urlDatabase)
+  let userURLS = urlsForUser(user_id, urlDatabase);
   const templateVars = { urls: userURLS, user };
   res.render("urls_index", templateVars);
 });
@@ -65,6 +63,18 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const { user_id } = req.cookies;
+  if (!urlDatabase[req.params.shortURL]) {
+   return res.sendStatus(404);
+  }
+
+  if (!user_id) {
+   return res.sendStatus(403);
+  }
+  const { shortURL } = req.params;
+  let ownerOfURL = urlDatabase[shortURL].userID;
+  if (user_id !== ownerOfURL) {
+   return res.sendStatus(403);
+  }
 
   let user = users[user_id];
   const templateVars = {
@@ -72,7 +82,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
   };
-  res.render("urls_show", templateVars);
+  return res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -92,20 +102,19 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+/// * if your ready to submit then you can delete this route
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+
 
 app.post("/urls", (req, res) => {
   const { user_id } = req.cookies;
   // Log the POST request body to the console
   const { longURL } = req.body;
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = {longURL, userID:user_id };
+  urlDatabase[shortURL] = { longURL, userID: user_id };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -156,17 +165,22 @@ app.post("/register", (req, res) => {
 });
 
 /////////////////
-// DELETE URL
+// DELETE URL         ** fix status(403) handling
 /////////////////
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const { user_id } = req.cookies;
   const { shortURL } = req.params;
-  if(user_id){
-    delete urlDatabase[shortURL];
-   return res.redirect("/urls");
-  } 
-  return res.sendStatus(401)
+  if (!user_id) {
+    return res.sendStatus(401);
+  }
+
+  let ownerOfURL = urlDatabase[shortURL].userID;
+  if (user_id !== ownerOfURL) {
+    return res.sendStatus(403);
+  }
+  delete urlDatabase[shortURL];
+  return res.redirect("/urls");
 });
 
 /////////////////
