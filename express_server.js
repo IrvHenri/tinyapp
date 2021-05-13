@@ -78,13 +78,10 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   //extract shortUrl from req.params
   const { shortURL } = req.params;
-
   // extract longUrl from req.body
   const { longURL } = req.body;
-
   // update url in the urlDatabase
-  urlDatabase[shortURL] = longURL;
-
+  urlDatabase[shortURL].longURL = longURL;
   // redirect to urls page
   res.redirect("/urls");
 });
