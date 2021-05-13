@@ -1,32 +1,30 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcrypt'); // Imported here to use on initial dummy user data
 const { helperGenerator, urlsForUser } = require("./helpers/helperFunctions");
 const app = express();
-app.use(cookieParser());
 const PORT = 8080;
+const saltRounds = 10;
 
 //  Middleware
+app.use(cookieParser());
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 // Set Ejs view engine
 app.set("view engine", "ejs");
 
-// const urlDatabase = {
-//   b2xVn2: "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com",
-// };
 
 const users = {
   "6fd85i": {
     id: "6fd85i",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: bcrypt.hashSync("purple-monkey-dinosaur", saltRounds)
   },
   gji08b: {
     id: "gji08b",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: bcrypt.hashSync("dishwasher-funk", saltRounds)
   },
 };
 
@@ -38,9 +36,9 @@ const urlDatabase = {
 const { generateRandomString, createNewUser, authenticateUser } =
   helperGenerator(users);
 
-  ///  you can redirect to /urls *
+
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
@@ -51,6 +49,17 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.post("/urls", (req, res) => {
+  const { user_id } = req.cookies;
+  // Log the POST request body to the console
+  const { longURL } = req.body;
+  let shortURL = generateRandomString();
+  urlDatabase[shortURL] = { longURL, userID: user_id };
+  res.redirect(`/urls/${shortURL}`);
+});
+
+
+
 app.get("/urls/new", (req, res) => {
   const { user_id } = req.cookies;
   let user = users[user_id];
@@ -60,6 +69,7 @@ app.get("/urls/new", (req, res) => {
   }
   return res.redirect("/login");
 });
+
 
 app.get("/urls/:shortURL", (req, res) => {
   const { user_id } = req.cookies;
@@ -109,14 +119,7 @@ app.get("/urls.json", (req, res) => {
 
 
 
-app.post("/urls", (req, res) => {
-  const { user_id } = req.cookies;
-  // Log the POST request body to the console
-  const { longURL } = req.body;
-  let shortURL = generateRandomString();
-  urlDatabase[shortURL] = { longURL, userID: user_id };
-  res.redirect(`/urls/${shortURL}`);
-});
+
 
 /////////////////
 // LOGIN / LOGOUT Routes
@@ -130,7 +133,7 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const result = authenticateUser(req.body, users);
+  const result = authenticateUser(req.body);
 
   if (result.error) {
     return res.sendStatus(403);
@@ -155,12 +158,14 @@ app.get("/register", (req, res) => {
   res.render("registration", templateVars);
 });
 
+
 app.post("/register", (req, res) => {
   const result = createNewUser(req.body);
   if (result.error) {
     return res.sendStatus(400);
   }
   res.cookie("user_id", result.data.id);
+  console.log(users)
   res.redirect("/urls");
 });
 
