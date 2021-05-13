@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
+const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt"); // Imported here to use on initial dummy user data
 const { helperGenerator, urlsForUser } = require("./helpers/helperFunctions");
 const app = express();
@@ -13,10 +14,10 @@ app.use(
     keys: ["key1", "key2"],
   })
 );
-const bodyParser = require("body-parser");
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-// Set Ejs view engine
+
 app.set("view engine", "ejs");
 
 const users = {
@@ -44,6 +45,9 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
+/////////////////
+//   Home page routes
+/////////////////
 app.get("/urls", (req, res) => {
   const { user_id } = req.session;
   let user = users[user_id];
@@ -52,14 +56,18 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+
 app.post("/urls", (req, res) => {
   const { user_id } = req.session;
-  // Log the POST request body to the console
   const { longURL } = req.body;
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = { longURL, userID: user_id };
   res.redirect(`/urls/${shortURL}`);
 });
+
+/////////////////
+//   Create Url form page  - once User is logged in
+/////////////////
 
 app.get("/urls/new", (req, res) => {
   const { user_id } = req.session;
@@ -71,22 +79,29 @@ app.get("/urls/new", (req, res) => {
   return res.redirect("/login");
 });
 
+
+/////////////////
+//   shortURL routes for viewing & updating LongURL
+/////////////////
+
 app.get("/urls/:shortURL", (req, res) => {
   const { user_id } = req.session;
+  let user = users[user_id];
+  //Error handle for non-existing short url
   if (!urlDatabase[req.params.shortURL]) {
-    return res.sendStatus(404);
+    return res.render('400_error_template',{ title: "404: Page Not Found!", user })
   }
-
+  //Error handle non-user url access
   if (!user_id) {
-    return res.sendStatus(403);
+    return res.render('400_error_template',{ title: "403: Forbidden!", user })
   }
+  //Error handle non-owner url access
   const { shortURL } = req.params;
   let ownerOfURL = urlDatabase[shortURL].userID;
   if (user_id !== ownerOfURL) {
-    return res.sendStatus(403);
+    return res.render('400_error_template',{ title: "403: Forbidden!", user })
   }
 
-  let user = users[user_id];
   const templateVars = {
     user,
     shortURL: req.params.shortURL,
@@ -96,21 +111,22 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  //extract shortUrl from req.params
+  
   const { shortURL } = req.params;
-  // extract longUrl from req.body
+ 
   const { longURL } = req.body;
-  // update url in the urlDatabase
+ 
   urlDatabase[shortURL].longURL = longURL;
-  // redirect to urls page
+  
   res.redirect("/urls");
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
-
+  // (minor) error handle and see if url exists
   res.redirect(longURL);
 });
+
 
 /// * if your ready to submit then you can delete this route
 app.get("/urls.json", (req, res) => {
@@ -118,7 +134,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 /////////////////
-// LOGIN / LOGOUT Routes
+//    LOGIN & LOGOUT Routes
 /////////////////
 
 app.get("/login", (req, res) => {
@@ -130,9 +146,11 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
   const result = authenticateUser(req.body);
+  const { user_id } = req.session;
+  let user = users[user_id];
 
   if (result.error) {
-    return res.sendStatus(403);
+    return res.render('400_error_template',{ title: "Username or password is invalid.", user }) 
   }
   req.session.user_id = result.data.id;
   res.redirect("/urls");
@@ -156,8 +174,11 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const result = createNewUser(req.body);
+  const { user_id } = req.session;
+  let user = users[user_id];
   if (result.error) {
-    return res.sendStatus(400);
+    //return html response
+    return res.render('400_error_template',{ title: "Email already taken!", user })
   }
   req.session.user_id = result.data.id;
 
@@ -165,7 +186,7 @@ app.post("/register", (req, res) => {
 });
 
 /////////////////
-// DELETE URL         ** fix status(403) handling
+//  DELETE URL     
 /////////////////
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -174,7 +195,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   if (!user_id) {
     return res.sendStatus(401);
   }
-
+  
   let ownerOfURL = urlDatabase[shortURL].userID;
   if (user_id !== ownerOfURL) {
     return res.sendStatus(403);
@@ -184,7 +205,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 /////////////////
-// 404
+// 404 routes
 /////////////////
 
 app.use(function (req, res) {
@@ -192,7 +213,7 @@ app.use(function (req, res) {
 
   let user = users[user_id];
   res.status(404);
-  res.render("404_error_template", { title: "404: Page Not Found!", user });
+  res.render("400_error_template", { title: "404: Page Not Found!", user });
 });
 
 app.listen(PORT, () => {
