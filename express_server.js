@@ -15,6 +15,18 @@ app.use(
   })
 );
 
+//user Parser
+const userParser = (req, res, next) => {
+
+  const userId = req.session['user_id'];
+  const user = users[userId];
+
+  req.currentUser = user;
+
+  next();
+}
+app.use(userParser)
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
@@ -51,10 +63,9 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const { user_id } = req.session;
-  let user = users[user_id];
   // if logged user_id is truthy, template will render the user's urls else it will display welcome message.
   let userURLS = urlsForUser(user_id, urlDatabase);
-  const templateVars = { urls: userURLS, user };
+  const templateVars = { urls: userURLS, user: req.currentUser };
   res.render("urls_index", templateVars);
 });
 
@@ -73,9 +84,8 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const { user_id } = req.session;
-  let user = users[user_id];
-  const templateVars = { user };
-  if (user && user_id) {
+  const templateVars = { user: req.currentUser };
+  if (user_id) {
     return res.render("urls_new", templateVars);
   }
   return res.redirect("/login");
@@ -88,7 +98,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const { user_id } = req.session;
-  let user = users[user_id];
+  let user = req.currentUser
   //Error handle for non-existing short url
   if (!urlDatabase[req.params.shortURL]) {
     return res.render('400_error_template',{ title: "404: Page Not Found!", user });
@@ -136,18 +146,17 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/login", (req, res) => {
   const { user_id } = req.session;
-  let user = users[user_id];
-  const templateVars = { user };
+  const templateVars = { user: req.currentUser };
   res.render("login", templateVars);
 });
 
 app.post("/login", (req, res) => {
   const result = authenticateUser(req.body);
   const { user_id } = req.session;
-  let user = users[user_id];
+  
 
   if (result.error) {
-    return res.render('400_error_template',{ title: "Username or password is invalid.", user });
+    return res.render('400_error_template',{ title: "Username or password is invalid.", user: req.currentUser });
   }
   req.session.user_id = result.data.id;
   res.redirect("/urls");
@@ -163,19 +172,16 @@ app.post("/logout", (req, res) => {
 /////////////////
 
 app.get("/register", (req, res) => {
-  const { user_id } = req.session;
-  let user = users[user_id];
-  const templateVars = { user };
+  
+  const templateVars = { user: req.currentUser };
   res.render("registration", templateVars);
 });
 
 app.post("/register", (req, res) => {
   const result = createNewUser(req.body);
-  const { user_id } = req.session;
-  let user = users[user_id];
   if (result.error) {
     //return html response
-    return res.render('400_error_template',{ title: "Email already taken!", user });
+    return res.render('400_error_template',{ title: result.error, user:req.currentUser });
   }
   req.session.user_id = result.data.id;
 
@@ -207,10 +213,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.use(function(req, res) {
   const { user_id } = req.session;
-
-  let user = users[user_id];
   res.status(404);
-  res.render("400_error_template", { title: "404: Page Not Found!", user });
+  res.render("400_error_template", { title: "404: Page Not Found!", user: req.currentUser });
 });
 
 app.listen(PORT, () => {

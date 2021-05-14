@@ -18,7 +18,7 @@ const helperGenerator = db =>{
 
   const createNewUser = (userParams) => {
     if(validateUserByEmail(userParams.email)){
-      return {data: null , error: 'User already exists'}
+      return {data: null , error: 'Email already taken'}
     }
     
     const { email, password } = userParams;
