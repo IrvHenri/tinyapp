@@ -47,8 +47,8 @@ const users = {
 };
 
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "6fd85i" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "6fd85i" },
 };
 
 const { generateRandomString, createNewUser, authenticateUser } =
