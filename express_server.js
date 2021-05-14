@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
 const bodyParser = require("body-parser");
+const methodOverride = require('method-override');
 const bcrypt = require("bcrypt"); // Imported here to use on initial dummy user data
 const { helperGenerator, urlsForUser } = require("./helpers/helperFunctions");
 const app = express();
@@ -15,7 +16,7 @@ app.use(
   })
 );
 
-//user Parser
+//user parser middleware
 const userParser = (req, res, next) => {
 
   const userId = req.session['user_id'];
@@ -24,12 +25,12 @@ const userParser = (req, res, next) => {
   req.currentUser = user;
 
   next();
-}
-app.use(userParser)
+};
+app.use(userParser);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-
+app.use(methodOverride('_method'));
 app.set("view engine", "ejs");
 
 const users = {
@@ -98,7 +99,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const { user_id } = req.session;
-  let user = req.currentUser
+  let user = req.currentUser;
   //Error handle for non-existing short url
   if (!urlDatabase[req.params.shortURL]) {
     return res.render('400_error_template',{ title: "404: Page Not Found!", user });
@@ -122,7 +123,7 @@ app.get("/urls/:shortURL", (req, res) => {
   return res.render("urls_show", templateVars);
 });
 
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   
   const { shortURL } = req.params;
  
@@ -145,16 +146,13 @@ app.get("/u/:shortURL", (req, res) => {
 /////////////////
 
 app.get("/login", (req, res) => {
-  const { user_id } = req.session;
+
   const templateVars = { user: req.currentUser };
   res.render("login", templateVars);
 });
 
 app.post("/login", (req, res) => {
   const result = authenticateUser(req.body);
-  const { user_id } = req.session;
-  
-
   if (result.error) {
     return res.render('400_error_template',{ title: "Username or password is invalid.", user: req.currentUser });
   }
@@ -192,7 +190,7 @@ app.post("/register", (req, res) => {
 //  DELETE URL
 /////////////////
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   const { user_id } = req.session;
   const { shortURL } = req.params;
   if (!user_id) {
@@ -212,7 +210,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 /////////////////
 
 app.use(function(req, res) {
-  const { user_id } = req.session;
   res.status(404);
   res.render("400_error_template", { title: "404: Page Not Found!", user: req.currentUser });
 });
