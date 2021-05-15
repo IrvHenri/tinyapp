@@ -47,8 +47,8 @@ const users = {
 };
 
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "6fd85i" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "6fd85i" },
+  "b6UTxQ": { longURL: "https://www.tsn.ca", userID: "6fd85i" },
+  "i3BoGr": { longURL: "https://www.google.ca", userID: "6fd85i" },
 };
 
 const { generateRandomString, createNewUser, authenticateUser } =
@@ -134,10 +134,11 @@ app.put("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
+/////KNOWN BUG FIXED each query to the same url was create a space in the url string ex: 'http://espn.com    '. fixed with trim()
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   // (minor) error handle and see if url exists
-  res.redirect(longURL);
+  res.redirect(longURL.trim());
 });
 
 
